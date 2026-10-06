@@ -1,0 +1,20 @@
+0:00 — PROBLEM & PRODUCT
+"This is FactoryProof: the software factory that proves its work. It's a BAND-native factory for the WeAreDevelopers Dark Factory hackathon. The problem: agent teams ship fast, but nothing proves the change survived real checks — until now."
+
+0:12 — FOUR SEATS
+"Four specialist seats: the Case Coordinator scopes the work, the Patch Builder implements only the approved contract, the Quality Verifier runs independent public AND sealed checks, and the Release Critic challenges the evidence. A human owner controls promotion."
+
+0:28 — THE CASE
+"The reference track is Pocketful: a wallet transfer service where money must never be created, destroyed, or spent twice under retries and concurrency, with exact integer-cents accounting."
+
+0:42 — FIRST BUILD FAILS (key evidence)
+"The Builder ships a first transfer. The Verifier's sealed acceptance check BLOCKS it: a repeated idempotency key moved money a second time. That failure is the point — the factory is load-bearing."
+
+0:55 — REVISION & APPROVAL
+"The Builder revises with an explicit idempotency guard. The Verifier's public and sealed checks go green. The Critic recommends promotion. The Human Owner approves. The case ships — with the audit trail preserved."
+
+1:15 — CLEAN CONTAINER
+"Each stage is a clean, self-contained Docker service. This is stage three: the atomic transfer path with idempotency replay protection and an audit stream. All stage tests pass in a container with no network calls."
+
+1:30 — EVIDENCE & SUBMISSION
+"The evidence package holds the deterministic local rehearsal, cover, slides, plus the live BAND Desktop room export, the room-and-service video, and the official harness report — all at kickoff. FactoryProof ships only evidence that survives independent checks and a human decision."
