@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "factoryproof"
+version = "0.1.0"
+description = "An evidence-driven multi-agent software factory for BAND"
+requires-python = ">=3.10"
+dependencies = []
+
+[project.optional-dependencies]
+band = ["band-sdk[anthropic]==3.1.1", "python-dotenv>=1.0"]
+band-claude = ["band-sdk[claude-sdk]==3.1.1", "python-dotenv>=1.0"]
+
+[project.scripts]
+factoryproof = "factoryproof.server:main"
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+include = ["factoryproof*", "band_agents*"]
+
+[tool.setuptools.package-data]
+band_agents = ["prompts/*.md"]

@@ -1,0 +1,84 @@
+#!/usr/bin/env python3
+from __future__ import annotations
+
+import argparse
+import json
+import subprocess
+import sys
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent
+STAGES = ("stage-1", "stage-2", "stage-3", "stage-4")
+REQUIRED = ("README.md", "factory_description.md", "band_agents", "mandates", "Dockerfile")
+
+
+def run(command: list[str], cwd: Path) -> None:
+    result = subprocess.run(command, cwd=cwd, text=True, capture_output=True)
+    if result.returncode:
+        print(result.stdout)
+        print(result.stderr, file=sys.stderr)
+        raise SystemExit(result.returncode)
+
+
+def check(strict: bool = False) -> int:
+    missing = [item for item in REQUIRED if not (ROOT / item).exists()]
+    missing.extend(f"{stage}/Dockerfile" for stage in STAGES if not (ROOT / stage / "Dockerfile").exists())
+    if missing:
+        print("Missing required paths:", ", ".join(missing))
+        return 1
+    secret_files = [path for path in (ROOT / "band_config.yaml", ROOT / ".env") if path.exists()]
+    if secret_files:
+        print("Secret-bearing files must not be committed:", ", ".join(str(path) for path in secret_files))
+        return 1
+    forbidden = ("pocketful", "tablekeeper", "endpoint", "data-testid", "error code")
+    mandate_hits = []
+    for path in (ROOT / "mandates").glob("*.md"):
+        if path.name == "README.md":
+            continue
+        text = path.read_text(encoding="utf-8").lower()
+        for word in forbidden:
+            if word in text:
+                mandate_hits.append(f"{path.name}:{word}")
+    if mandate_hits:
+        print("Mandates contain track-specific terms:", ", ".join(mandate_hits))
+        return 1
+    run([sys.executable, "scripts/verify.py"], ROOT)
+    blockers = []
+    if not (ROOT / "evidence" / "band-room-export.json").exists():
+        blockers.append("BAND Desktop room export is not present")
+    if not (ROOT / "evidence" / "demo-video.mp4").exists():
+        blockers.append("Demo video containing the BAND room is not present")
+    if not (ROOT / "evidence" / "cover.png").exists():
+        blockers.append("Cover image is not present")
+    if not (ROOT / "evidence" / "slides.pdf").exists():
+        blockers.append("Slide presentation is not present")
+    links = ROOT / "evidence" / "submission_links.md"
+    if not links.exists() or "TODO" in links.read_text(encoding="utf-8"):
+        blockers.append("Public repository, demo URL, and BAND room links are not finalized")
+    print(json.dumps({"local_checks": "passed", "external_blockers": blockers}, indent=2))
+    return 1 if strict and blockers else 0
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description="FactoryProof local preflight harness")
+    parser.add_argument("command", choices=["check", "run", "export-room"])
+    parser.add_argument("--stage", choices=STAGES, default="stage-3")
+    parser.add_argument("--strict", action="store_true")
+    args = parser.parse_args()
+    if args.command == "check":
+        return check(args.strict)
+    if args.command == "run":
+        stage = ROOT / args.stage
+        run([sys.executable, "-m", "unittest", "discover", "-s", "tests", "-v"], stage)
+        print(f"{args.stage} tests passed")
+        return 0
+    export = ROOT / "evidence" / "band-room-export.json"
+    if not export.exists():
+        print("No BAND Desktop room export found. Run the official harness export-room after the live room is recorded.")
+        return 2
+    print(export)
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

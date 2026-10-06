@@ -1,0 +1,12 @@
+coordinator:
+  agent_id: "coordinator-agent-uuid"
+  api_key: "replace-with-band-agent-key"
+builder:
+  agent_id: "builder-agent-uuid"
+  api_key: "replace-with-band-agent-key"
+verifier:
+  agent_id: "verifier-agent-uuid"
+  api_key: "replace-with-band-agent-key"
+critic:
+  agent_id: "critic-agent-uuid"
+  api_key: "replace-with-band-agent-key"
